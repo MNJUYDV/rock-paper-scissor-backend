@@ -55,7 +55,7 @@ class DAL:
     def get_all_players(self):
         sql = "SELECT * FROM players"
         players = self.execute_sql(sql, fetch_all=True)
-        res = [{"player_id": player[0], "player_name": player[1]} for player in players]
+        res = [{"player_name": player[1], "wins": 4, "losses": 3, "ties": 6} for player in players]
         return res
     
     def create_player(self, player_name):
