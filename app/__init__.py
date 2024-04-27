@@ -11,5 +11,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=True
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
-from app.routes import player_bp
+from app.routes import player_bp, leaderboard_bp
 app.register_blueprint(player_bp)
+app.register_blueprint(leaderboard_bp)
