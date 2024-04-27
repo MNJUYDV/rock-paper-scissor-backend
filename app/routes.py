@@ -26,3 +26,9 @@ def create_player():
     player_id = dal.create_player(player_name)
     return jsonify({"player_id": player_id}), 201
 
+@app.route('/game-status', methods=['POST'])
+def create_game_status():
+    data = request.json
+    player_score = data.get('player_score')
+    return jsonify({"player_score": player_score}), 201
+
