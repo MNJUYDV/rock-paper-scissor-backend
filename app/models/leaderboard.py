@@ -3,7 +3,7 @@ from app.models.player import Player
 from app.models.game import Game
 
 class LeaderBoard(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     player_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'), nullable=False)
     player_score = db.Column(db.Integer)

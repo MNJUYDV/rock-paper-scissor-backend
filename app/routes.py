@@ -27,6 +27,7 @@ def get_leaderboard():
     
     # Count wins, losses, and ties for each player
     for entry in leaderboard:
+        print(entry)
         player_name = Player.query.get(entry.player_id).name
         
         # Initialize counts if player_name is not already present in the dictionaries
@@ -62,7 +63,7 @@ def create_leaderboard_entry():
     request_data = request.json
     player_name = request_data.get('player_name')
     player_score = request_data.get('player_score')
-    game_score = request_data.get('game_score')
+    game_score = request_data.get('computer_score')
     
     # If player_name is not provided, return an error response
     if not player_name:
