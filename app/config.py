@@ -6,5 +6,5 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
 
-class ProductionConfig(Config):
+class TestingConfig(Config):
     DEBUG = False
