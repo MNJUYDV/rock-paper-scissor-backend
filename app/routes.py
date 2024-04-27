@@ -11,7 +11,7 @@ dal = DAL("database.db")
 # Create database tables if they don't exist
 dal.create_player_table()
 dal.create_game_table()
-dal.create_game_status_table()
+dal.create_leaderboard()
 
 @app.route('/players', methods=['GET'])
 def get_players():
@@ -22,13 +22,17 @@ def get_players():
 def create_player():
     data = request.json
     player_name = data.get('player_name')
-    
     player_id = dal.create_player(player_name)
     return jsonify({"player_id": player_id}), 201
 
-@app.route('/game-status', methods=['POST'])
-def create_game_status():
+@app.route('/leaderboard', methods=['POST'])
+def create_leaderboard_entry():
     data = request.json
-    player_score = data.get('player_score')
-    return jsonify({"player_score": player_score}), 201
+    entry_id = dal.create_leaderboard_entry(data)
+    return jsonify({"entry_id": entry_id}), 201
+
+@app.route('/leaderboard', methods=['GET'])
+def get_leaderboard():
+    leaderboard = dal.get_leaderboard()
+    return jsonify({"leaderboard": leaderboard}), 201
 

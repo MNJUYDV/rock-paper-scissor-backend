@@ -13,6 +13,7 @@ class DAL:
         return sqlite3.connect(self.db_name)
 
     def execute_sql(self, sql, params=None, fetch_all=False):
+        print("Params are ", params)
         conn = self.connect()
         cursor = conn.cursor()
         if params:
@@ -28,39 +29,72 @@ class DAL:
         return result
 
     def create_player_table(self):
-        sql = '''CREATE TABLE IF NOT EXISTS players (
-                    player_id INTEGER PRIMARY KEY,
-                    player_name TEXT
+        sql = '''CREATE TABLE IF NOT EXISTS player (
+                    id INTEGER PRIMARY KEY,
+                    name TEXT
                 )'''
         self.execute_sql(sql)
 
     def create_game_table(self):
-        sql = '''CREATE TABLE IF NOT EXISTS games (
-                    game_id INTEGER PRIMARY KEY,
-                    game_name TEXT,
-                    game_type TEXT
+        sql = '''CREATE TABLE IF NOT EXISTS game (
+                    id INTEGER PRIMARY KEY,
+                    name TEXT,
+                    type TEXT
                 )'''
         self.execute_sql(sql)
-
-    def create_game_status_table(self):
-        sql = '''CREATE TABLE IF NOT EXISTS game_status (
+        
+    def create_leaderboard(self):
+        sql = '''CREATE TABLE IF NOT EXISTS leaderboard (
+                    id INTEGER PRIMARY KEY, 
                     game_id INTEGER,
                     player_id INTEGER,
-                    status TEXT,
-                    FOREIGN KEY (game_id) REFERENCES games(game_id),
-                    FOREIGN KEY (player_id) REFERENCES players(player_id)
+                    player_score INTEGER,
+                    computer_score INTEGER,
+                    last_modified DATE,
+                    FOREIGN KEY (game_id) REFERENCES game(id),
+                    FOREIGN KEY (player_id) REFERENCES player(id)
                 )'''
         self.execute_sql(sql)
 
     def get_all_players(self):
-        sql = "SELECT * FROM players"
+        sql = "SELECT * FROM player"
         players = self.execute_sql(sql, fetch_all=True)
-        res = [{"player_name": player[1], "wins": 4, "losses": 3, "ties": 6} for player in players]
+        res = [{"player_name": player[1]} for player in players]
         return res
     
+    def get_all_games(self):
+        sql = "SELECT * FROM game"
+        games = self.execute_sql(sql, fetch_all=True)
+        res = [{"game_id": game[0], "game_name": game[1]} for game in games]
+        return res
+    
+    def get_leaderboard(self):
+        sql = "SELECT * FROM leaderboard"
+        leaderboard = self.execute_sql(sql, fetch_all=True)
+        res = [{"entry_id": entry[0], "player_id": entry[2], "player_score": entry[3], "computer_score": entry[4]} for entry in leaderboard]
+        return res
+    
+    # def create_player(self, name):
+    #     sql = "INSERT INTO player(name) VALUES (?)"
+    #     player_id = self.execute_sql(sql, (name))
+    #     return player_id
+    
     def create_player(self, player_name):
-        sql = "INSERT INTO players (player_name) VALUES (?)"
+        sql = "INSERT INTO player (name) VALUES (?)"
         player_id = self.execute_sql(sql, (player_name,))
         return player_id
-
-    # Implement methods for CRUD operations on game, game status, etc.
+    
+    def create_game(self):
+        sql = "INSERT INTO game (name, type) VALUES (?, ?)"
+        game_id = self.execute_sql(sql, ('game', 'human vs computer'))
+        return game_id
+    
+    def create_leaderboard_entry(self, data):
+        player_name = data.get('player_name')
+        player_score = data.get('player_score')
+        computer_score = data.get('player_score')
+        player_id = self.create_player(player_name)
+        game_id = self.create_game()
+        sql = "INSERT INTO leaderboard (game_id, player_id, player_score, computer_score) VALUES (?, ?, ?, ?)"
+        entry_id = self.execute_sql(sql, (game_id, player_id, player_score, computer_score))
+        return entry_id      
