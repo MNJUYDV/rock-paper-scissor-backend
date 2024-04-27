@@ -1,7 +1,7 @@
 from app.models.leaderboard import LeaderBoard
-from flask import request, jsonify
+from flask import jsonify
 from app.models.player import Player
-from app import app, db
+from app import db
 from app.models.game import Game
 from datetime import date
 

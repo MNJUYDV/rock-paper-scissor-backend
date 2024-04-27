@@ -1,9 +1,4 @@
 from flask import request, jsonify, Blueprint
-from app import app, db
-from app.models.player import Player
-from app.models.game import Game
-from app.models.leaderboard import LeaderBoard
-from datetime import date
 from app.services.leaderboard_service import LeaderBoardService
 
 leaderboard_bp = Blueprint('leaderboard_bp', __name__)

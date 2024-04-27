@@ -1,6 +1,4 @@
 from app import db
-from app.models.player import Player
-from app.models.game import Game
 
 class LeaderBoard(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

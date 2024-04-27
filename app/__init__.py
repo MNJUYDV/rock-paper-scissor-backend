@@ -1,7 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-from sqlalchemy.engine.reflection import Inspector
 from flask_cors import CORS
 from .config import DevelopmentConfig
 
