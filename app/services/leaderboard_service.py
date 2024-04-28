@@ -8,7 +8,7 @@ from flask import jsonify
 class LeaderBoardService:
     
     @staticmethod
-    def get_leaderboard():
+    def get_players_stats():
         # Get all players
         players = Player.query.all()
 
@@ -18,6 +18,8 @@ class LeaderBoardService:
         # Iterate over all players
         for player in players:
             player_id = player.id
+            if player_id == 1:
+                continue
 
             # Initialize aggregated stats for the player
             aggregated_stats = {
@@ -52,6 +54,7 @@ class LeaderBoardService:
     def create_leaderboard_entry(request):
         # Get data from request body
         request_data = request.json
+        print(request_data)
         game_id = request_data.get('game_id')
         player1_score = request_data.get('player1_score')
         player2_score = request_data.get('player2_score')
@@ -74,3 +77,14 @@ class LeaderBoardService:
         db.session.commit()
 
         return jsonify({'message': 'Leaderboard entry created successfully'}), 201
+    
+    def get_leaderboard():
+        response = []
+        leaderboard = LeaderBoard.query.all()
+        for e in leaderboard:
+            response.append({
+                "game_id": e.game_id,
+                "player1_score": e.player1_score,
+                "player2_score": e.player2_score
+            })
+        return response

@@ -5,6 +5,11 @@ from app.services.game_player_service import GamePlayerService
 
 bp = Blueprint('leaderboard_bp', __name__)
 
+@bp.route('/api/v1/players-stats', methods=['GET'])
+def get_players_stats():
+    response_data = LeaderBoardService.get_players_stats()
+    return jsonify({"leaderboard_stats": response_data})
+
 @bp.route('/api/v1/leaderboard', methods=['GET'])
 def get_leaderboard():
     response_data = LeaderBoardService.get_leaderboard()
@@ -19,8 +24,8 @@ def create_leaderboard_entry():
 
 @bp.route('/api/v1/start-game', methods=['POST'])
 def start_game():
-    GameService.start_game(request)
-    return jsonify({'message': 'Game entry created successfully'}), 201
+    response = GameService.start_game(request)
+    return jsonify({'data': {"game_id": response.game_id}, 'message': 'Game entry created successfully'}), 201
 
 @bp.route('/api/v1/game-players', methods=['GET'])
 def get_game_play():

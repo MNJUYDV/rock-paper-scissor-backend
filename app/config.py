@@ -8,3 +8,4 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     DEBUG = False
+    
