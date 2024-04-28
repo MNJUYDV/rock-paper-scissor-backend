@@ -25,7 +25,7 @@ docker run -p 5000:5000 rock-paper-scissor-backend
 
 **The backend server exposes the following APIs:**
 
-GET /api/v1/leaderboard: Retrieves the leaderboard statistics.
+GET /api/v1/players-stats: Retrieves the leaderboard players statistics.
 POST /api/v1/leaderboard: Creates a new entry in the leaderboard.
 POST /api/v1/start-game: Starts a new game.
-GET /api/v1/game-players: Retrieves game players information.
+GET /api/v1/game-players: Retrieves game players join information.
