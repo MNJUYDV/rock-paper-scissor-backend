@@ -2,15 +2,13 @@ from app import db
 
 class LeaderBoard(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    player_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
-    game_id = db.Column(db.Integer, db.ForeignKey('game.id'), nullable=False)
-    player_score = db.Column(db.Integer)
-    computer_score = db.Column(db.Integer)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'), unique=True)
+    player1_score = db.Column(db.Integer)
+    player2_score = db.Column(db.Integer)
     created_at = db.Column(db.Date, nullable=False)
     
     # Define relationships
-    player = db.relationship('Player', backref='leaderboard_entries')
     game = db.relationship('Game', backref='leaderboard_entries')
 
     def __repr__(self):
-        return f"<LeaderBoard(id={self.id}, player_id={self.player_id}, game_id={self.game_id}, player_score={self.player_score}, computer_score={self.computer_score}, created_at={self.created_at})>"
+        return f"<LeaderBoard(id={self.id}, game_id={self.game_id}, player1_score={self.player1_score}, player2_score={self.player2_score}, created_at={self.created_at})>"

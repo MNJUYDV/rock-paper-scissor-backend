@@ -25,7 +25,7 @@ class TestGameModel(unittest.TestCase):
 
     def test_game_creation(self):
         # Create a new Game instance
-        game = Game(name='Test Game', type='Single Player')
+        game = Game(name='Test Game')
 
         # Add the game to the session and commit to the database
         with self.app.app_context():
@@ -39,8 +39,7 @@ class TestGameModel(unittest.TestCase):
             self.assertIsNotNone(retrieved_game)
 
             # Assert that the attributes of the retrieved game match the original values
-            self.assertEqual(retrieved_game.name, 'Test Game')
-            self.assertEqual(retrieved_game.type, 'Single Player')
+            self.assertEqual(retrieved_game.name)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,81 +1,76 @@
 from app.models.leaderboard import LeaderBoard
-from flask import jsonify
 from app.models.player import Player
+from app.models.game_player import GamePlayer
 from app import db
-from app.models.game import Game
 from datetime import date
+from flask import jsonify
 
 class LeaderBoardService:
-    def get_leaderboard():
-        leaderboard = LeaderBoard.query.all()
-        
-        # Initialize dictionaries to store win, loss, and tie counts for each player
-        win_count = {}
-        loss_count = {}
-        tie_count = {}
-        
-        # Count wins, losses, and ties for each player
-        for entry in leaderboard:
-            print(entry)
-            player_name = Player.query.get(entry.player_id).name
-            
-            # Initialize counts if player_name is not already present in the dictionaries
-            if player_name not in win_count:
-                win_count[player_name] = 0
-                loss_count[player_name] = 0
-                tie_count[player_name] = 0
-            
-            # Determine win, loss, or tie based on player_score and computer_score
-            if entry.player_score > entry.computer_score:
-                win_count[player_name] += 1
-            elif entry.player_score < entry.computer_score:
-                loss_count[player_name] += 1
-            else:
-                tie_count[player_name] += 1
-        
-        # Prepare response data
-        response_data = []
-        for player_name in win_count.keys():
-            response_data.append({
-                "player_name": player_name,
-                "wins": win_count[player_name],
-                "losses": loss_count[player_name],
-                "ties": tie_count[player_name]
-            })
-        
-        return response_data
     
+    @staticmethod
+    def get_leaderboard():
+        # Get all players
+        players = Player.query.all()
+
+        # Dictionary to store aggregated stats for each player
+        aggregated_stats_per_player = {}
+
+        # Iterate over all players
+        for player in players:
+            player_id = player.id
+
+            # Initialize aggregated stats for the player
+            aggregated_stats = {
+                "wins": 0,
+                "losses": 0,
+                "ties": 0
+            }
+
+            # Fetch all games where the player is player1
+            games_for_player = GamePlayer.query.filter_by(player1_id=player_id).all()
+            
+            for game in games_for_player:
+                # Fetch one leaderboard entry for the current game
+                leaderboard = LeaderBoard.query.filter_by(game_id=game.game_id).first()
+
+                # Calculate wins, losses, and ties for the player
+                if leaderboard:
+                    if leaderboard.player1_score > leaderboard.player2_score:
+                        aggregated_stats["wins"] += 1
+                    elif leaderboard.player1_score < leaderboard.player2_score:
+                        aggregated_stats["losses"] += 1
+                    else:
+                        aggregated_stats["ties"] += 1
+
+            # Store aggregated stats for the player
+            aggregated_stats_per_player[player.name] = aggregated_stats
+
+        return aggregated_stats_per_player
+
+    
+    @staticmethod
     def create_leaderboard_entry(request):
-    # Get data from request body
+        # Get data from request body
         request_data = request.json
-        player_name = request_data.get('player_name')
-        player_score = request_data.get('player_score')
-        game_score = request_data.get('computer_score')
-        
-        # If player_name is not provided, return an error response
-        if not player_name:
-            return jsonify({'error': 'Player name is required'}), 400
+        game_id = request_data.get('game_id')
+        player1_score = request_data.get('player1_score')
+        player2_score = request_data.get('player2_score')
 
-        # Create a new player
-        player = Player(name=player_name)
-        db.session.add(player)
-        db.session.commit()
+        # If game_id is not provided, return an error response
+        if not game_id:
+            return jsonify({'error': 'Game ID is required'}), 400
 
-        # Create a new game (default name and type)
-        game = Game(name='game1', type='human vs computer')
-        db.session.add(game)
-        db.session.commit()
+        # Set default player2_id to 1
+        player2 = Player.query.get(1)  # Assuming player2_id=1 exists in the database
 
         # Create a new leaderboard entry
         leaderboard_entry = LeaderBoard(
-            player_id=player.id,
-            game_id=game.id,
-            player_score=player_score,
-            computer_score=game_score,
+            game_id=game_id,
+            player1_score=player1_score,
+            player2_score=player2_score,
             created_at=date.today()
         )
         db.session.add(leaderboard_entry)
         db.session.commit()
-    
-    
-    
+
+        return jsonify({'message': 'Leaderboard entry created successfully'}), 201

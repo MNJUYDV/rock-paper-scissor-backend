@@ -11,5 +11,5 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 CORS(app)
 
-from app.routes import leaderboard_bp
-app.register_blueprint(leaderboard_bp)
+from app.routes import bp
+app.register_blueprint(bp)

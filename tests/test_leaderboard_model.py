@@ -23,7 +23,7 @@ class TestLeaderBoardModel(unittest.TestCase):
     def setUp(self):
         # Create test data
         self.player = Player(name='Test Player')
-        self.game = Game(name='Test Game', type='Single Player')
+        self.game = Game(name='Test Game')
         self.leaderboard_entry = LeaderBoard(player=self.player, game=self.game,
                                              player_score=10, computer_score=5,
                                              created_at=date.today())
