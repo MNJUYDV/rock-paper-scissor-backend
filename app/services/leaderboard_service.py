@@ -58,20 +58,14 @@ class LeaderBoardService:
     @staticmethod
     def create_leaderboard_entry(request):
         try:
-            # Get data from request body
             request_data = request.json
             game_id = request_data.get('game_id')
             player1_score = request_data.get('player1_score')
             player2_score = request_data.get('player2_score')
 
-            # If game_id is not provided, return an error response
             if not game_id:
                 return jsonify({'error': 'Game ID is required'}), 400
-
-            # Set default player2_id to 1
-            player2 = Player.query.get(1)  # Assuming player2_id=1 exists in the database
-
-            # Create a new leaderboard entry
+            
             leaderboard_entry = LeaderBoard(
                 game_id=game_id,
                 player1_score=player1_score,

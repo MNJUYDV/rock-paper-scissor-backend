@@ -2,14 +2,17 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS
-from .config import DevelopmentConfig
+from .config import DevelopmentConfig, TestingConfig
+import os
 
-app = Flask(__name__)
-app.config.from_object(DevelopmentConfig)  # Use the configuration class
+db = SQLAlchemy()
 
-db = SQLAlchemy(app)
-ma = Marshmallow(app)
-CORS(app)
+def create_app(config=DevelopmentConfig):
+    app = Flask(__name__, instance_relative_config=True)
+    app.config.from_object(config)  
+    db.init_app(app)
+    CORS(app)
 
-from app.routes import bp
-app.register_blueprint(bp)
+    from app.routes import bp
+    app.register_blueprint(bp)
+    return app

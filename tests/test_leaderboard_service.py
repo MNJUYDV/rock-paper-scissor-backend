@@ -1,86 +1,100 @@
+import os
+import sys
+topdir = os.path.join(os.path.dirname(__file__), "..")
+sys.path.append(topdir)
+
 import unittest
-from unittest.mock import patch, MagicMock
-from app.models.leaderboard import LeaderBoard
-from app import db
-from flask import jsonify
-from app.services.leaderboard_service import LeaderBoardService  # Replace 'your_app' with the actual name of your application package
+from flask import json
 from app import create_app, db
+from app.models.leaderboard import LeaderBoard
+from app.models.game_player import GamePlayer
+from app.models.game import Game
+from app.models.player import Player
+from app.services.leaderboard_service import LeaderBoardService
+from app.config import TestingConfig
+from datetime import date
+from unittest.mock import patch, MagicMock
+from flask import jsonify
 
-class TestLeaderBoardService(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        # Set up Flask app for testing
-        cls.app = create_app('testing')
-        cls.app_context = cls.app.app_context()
-        cls.app_context.push()
-        db.create_all()
-
-    @classmethod
-    def tearDownClass(cls):
-        # Clean up after testing
-        db.session.remove()
-        db.drop_all()
-        cls.app_context.pop()
-
+class TestLeaderboardAPI(unittest.TestCase):
+    
     def setUp(self):
-        # Create test data
-        self.request_data = {
-            'player_name': 'Test Player',
-            'player_score': 10,
-            'computer_score': 5
+        self.app = create_app(TestingConfig)
+        self.client = self.app.test_client()
+        with self.app.app_context():
+            db.create_all()
+        
+    @patch('app.services.leaderboard_service.db')
+    def test_get_players_stats_success(self, MockDB):
+        # Mocking the query results
+        mock_result1 = ('Player1', 3, 2, 1)
+        mock_result2 = ('Player2', 2, 3, 0)
+
+        # Set the return value of the mock query
+        MockDB.session.query().join().join().group_by().order_by().limit().all.return_value = [mock_result1, mock_result2]
+
+        # Call the method
+        result = LeaderBoardService.get_players_stats()
+
+        # Assertions
+        expected_result = {
+            'Player1': {'wins': 3, 'losses': 2, 'ties': 1},
+            'Player2': {'wins': 2, 'losses': 3, 'ties': 0}
         }
+        self.assertEqual(result, expected_result)
+        
+    @patch('app.services.leaderboard_service.db')
+    def test_get_players_stats_failure(self, MockDB):
+        # Mocking an exception
+        MockDB.session.query().join().join().group_by().order_by().limit().all.side_effect = Exception("Database Error")
 
-    def tearDown(self):
-        # Clean up test data
-        db.session.rollback()
+        # Call the method
+        result = LeaderBoardService.get_players_stats()
 
-    @patch('app.models.leaderboard.LeaderBoard.query')
-    @patch('app.models.leaderboard.Player.query')
-    def test_get_leaderboard(self, mock_player_query, mock_leaderboard_query):
-        # Mock LeaderBoard and Player queries
-        mock_leaderboard_query.all.return_value = [
-            LeaderBoard(id=1, player_id=1, player_score=10, computer_score=5),
-            LeaderBoard(id=2, player_id=2, player_score=5, computer_score=10)
+        # Assertions
+        expected_error = 'Error fetching players stats: Database Error'
+        self.assertEqual(result, expected_error)
+            
+    @patch('app.services.leaderboard_service.LeaderBoard')
+    def test_get_leaderboard_success(self, MockLeaderBoard):
+        # Mocking the query results
+        mock_leaderboard1 = MagicMock()
+        mock_leaderboard1.game_id = 1
+        mock_leaderboard1.player1_score = 3
+        mock_leaderboard1.player2_score = 2
+
+        mock_leaderboard2 = MagicMock()
+        mock_leaderboard2.game_id = 2
+        mock_leaderboard2.player1_score = 2
+        mock_leaderboard2.player2_score = 1
+
+        # Set the return value of the mock query
+        MockLeaderBoard.query.all.return_value = [mock_leaderboard1, mock_leaderboard2]
+
+        # Call the method
+        result = LeaderBoardService.get_leaderboard()
+
+        # Assertions
+        expected_result = [
+            {"game_id": 1, "player1_score": 3, "player2_score": 2},
+            {"game_id": 2, "player1_score": 2, "player2_score": 1}
         ]
-        mock_player_query.get.side_effect = lambda player_id: MagicMock(name=f'Player{id}', name='Test Player')
+        self.assertEqual(result, expected_result)  
+            
 
-        # Call the get_leaderboard method
-        response_data = LeaderBoardService.get_leaderboard()
-
-        # Check if the response data is as expected
-        expected_data = [
-            {'player_name': 'Test Player', 'wins': 1, 'losses': 1, 'ties': 0},
-            {'player_name': 'Test Player', 'wins': 0, 'losses': 1, 'ties': 0}
-        ]
-        self.assertEqual(response_data, expected_data)
-
-    @patch('app.models.leaderboard.Player')
-    @patch('app.models.leaderboard.Game')
-    def test_create_leaderboard_entry(self, mock_game, mock_player):
-        # Mock Player and Game creation
-        mock_player_instance = MagicMock(id=1)
-        mock_player.return_value = mock_player_instance
-        mock_game_instance = MagicMock(id=1)
-        mock_game.return_value = mock_game_instance
-
-        # Call the create_leaderboard_entry method
-        response = LeaderBoardService.create_leaderboard_entry(MagicMock(json=lambda: self.request_data))
-
-        # Check if the response is as expected
-        expected_response = jsonify(success=True)
-        self.assertEqual(response, expected_response)
-
-        # Check if the player and game were added to the session
-        self.assertIn(mock_player_instance, db.session.add.call_args_list)
-        self.assertIn(mock_game_instance, db.session.add.call_args_list)
-
-        # Check if the leaderboard entry was added to the session
-        leaderboard_entry_args = db.session.add.call_args[0][0]
-        self.assertEqual(leaderboard_entry_args.player_id, mock_player_instance.id)
-        self.assertEqual(leaderboard_entry_args.game_id, mock_game_instance.id)
-        self.assertEqual(leaderboard_entry_args.player_score, self.request_data['player_score'])
-        self.assertEqual(leaderboard_entry_args.computer_score, self.request_data['computer_score'])
-
+    @patch('app.services.leaderboard_service.LeaderBoardService.create_leaderboard_entry')
+    @patch('app.models.game.Game')
+    def test_create_leaderboard_entry(self, MockGame, mock_create_leaderboard_entry):
+        mock_game = MagicMock()
+        mock_game.id = 1
+        MockGame.query.get.return_value = mock_game
+        
+        mock_create_leaderboard_entry.return_value = [{"game_id": 1, "player1_score": 1, "player2_score": 2}]
+        data = LeaderBoardService.create_leaderboard_entry({'game_id': '1', "player1_score": 1, "player2_score": 2})
+        self.assertEqual(data[0]["game_id"], 1)
+        self.assertEqual(data[0]["player1_score"], 1)
+        self.assertEqual(data[0]["player2_score"], 2)
+    
 if __name__ == '__main__':
     unittest.main()

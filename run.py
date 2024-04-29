@@ -1,4 +1,4 @@
-from app import app, db
+from app import create_app, db
 from app.models.player import Player
 
 def insert_initial_values():
@@ -10,6 +10,7 @@ def insert_initial_values():
 
 if __name__ == '__main__':
     # Create database tables
+    app = create_app()
     with app.app_context():
         db.create_all()
         insert_initial_values()
