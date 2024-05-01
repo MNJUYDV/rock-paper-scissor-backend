@@ -11,9 +11,9 @@ class GameService:
             new_game = Game(name="game1")
             db.session.add(new_game)
             db.session.commit()
-            return {"data": new_game, "status_code": 200}
+            return {"data": new_game}
         except Exception as e:
-            return {"error": str(e), "status_code": 500}
+            return {"error": str(e)}
     
     @staticmethod
     def start_game(request):
@@ -25,6 +25,6 @@ class GameService:
             if "error" in game_response:
                 raise Exception(game_response["error"])
             game_player = GamePlayerService.create_game_player(game_response["data"].id, player_response["data"].id)
-            return {"data": {"game_player_id": game_player.id, "game_id": game_player.game_id, "player1_id": game_player.player1_id}}
+            return {"game_player_id": game_player.id, "game_id": game_player.game_id, "player1_id": game_player.player1_id}
         except Exception as e:
             return {"error": str(e)}
