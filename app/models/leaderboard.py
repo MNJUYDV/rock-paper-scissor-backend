@@ -3,8 +3,8 @@ from app import db
 class LeaderBoard(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'), nullable=False)
-    player1_score = db.Column(db.Integer)
-    player2_score = db.Column(db.Integer)
+    player1_score = db.Column(db.Integer, nullable = False)
+    player2_score = db.Column(db.Integer, nullable = False)
     created_at = db.Column(db.Date, nullable=False)
     
     # Define relationships
