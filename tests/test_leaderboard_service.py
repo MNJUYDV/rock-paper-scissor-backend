@@ -1,20 +1,15 @@
 import os
 import sys
+
 topdir = os.path.join(os.path.dirname(__file__), "..")
 sys.path.append(topdir)
 
 import unittest
-from flask import json
 from app import create_app, db
-from app.models.leaderboard import LeaderBoard
-from app.models.game_player import GamePlayer
-from app.models.game import Game
-from app.models.player import Player
 from app.services.leaderboard_service import LeaderBoardService
 from app.config import TestingConfig
-from datetime import date
 from unittest.mock import patch, MagicMock
-from flask import jsonify
+from app.services.game_service import GameService
 
 
 class TestLeaderboardAPI(unittest.TestCase):
@@ -22,8 +17,9 @@ class TestLeaderboardAPI(unittest.TestCase):
     def setUp(self):
         self.app = create_app(TestingConfig)
         self.client = self.app.test_client()
-        with self.app.app_context():
-            db.create_all()
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        db.create_all()
         
     @patch('app.services.leaderboard_service.db')
     def test_get_players_stats_success(self, MockDB):
@@ -95,6 +91,30 @@ class TestLeaderboardAPI(unittest.TestCase):
         self.assertEqual(data[0]["game_id"], 1)
         self.assertEqual(data[0]["player1_score"], 1)
         self.assertEqual(data[0]["player2_score"], 2)
+        
+    @patch('app.services.game_service.PlayerService.create_player')
+    @patch('app.services.game_service.GameService.create_game')
+    @patch('app.services.game_service.GamePlayerService.create_game_player')
+    def test_start_game_success(self, mock_create_game_player, mock_create_game, mock_create_player):
+        # Mocking responses
+        mock_player_response = {"data": MagicMock(id=1)}
+        mock_create_player.return_value = mock_player_response
+
+        mock_game_response = {"data": MagicMock(id=1)}
+        mock_create_game.return_value = mock_game_response
+
+        mock_game_player_response = {"data": MagicMock(id=1, game_id=1, player1_id=1)}
+        mock_create_game_player.return_value = mock_game_player_response
+
+        # Call the method
+        result = GameService.start_game({})
+
+        # Assertions
+        self.assertIn("game_player_id", result)
+        self.assertIn("game_id", result)
+        self.assertIn("player1_id", result)
+        self.assertEqual(result["game_id"], 1)
+        self.assertEqual(result["player1_id"], 1)
     
 if __name__ == '__main__':
     unittest.main()
