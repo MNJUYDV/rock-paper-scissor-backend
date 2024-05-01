@@ -15,4 +15,10 @@ def create_app(config=DevelopmentConfig):
 
     from app.routes import bp
     app.register_blueprint(bp)
+    
+    from .seed import seed_initial_values
+    with app.app_context():
+        db.create_all()
+        seed_initial_values()
+        
     return app
