@@ -1,6 +1,6 @@
 Flask
 Flask-SQLAlchemy==3.0.2
 Flask-Marshmallow==0.15.0
-alembic==1.7.3
 flask_cors
 pytest
+Flask-Migrate

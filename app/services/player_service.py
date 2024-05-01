@@ -11,11 +11,11 @@ class PlayerService:
 
             # Check if player name is provided in the request
             if not player_name:
-                return jsonify({'error': 'Player name is required'}), 400
+                raise Exception("Player name is required")
 
             new_player = Player(name=player_name)
             db.session.add(new_player)
             db.session.commit()
-            return new_player
+            return {"data": new_player, "status_code": 200}
         except Exception as e:
-            return jsonify({'error': f'Error creating player: {str(e)}'}), 500
+            return {"error": str(e), "status_code": 500}

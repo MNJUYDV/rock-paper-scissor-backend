@@ -9,9 +9,9 @@ class GamePlayerService:
             game_player = GamePlayer(game_id=game_id, player1_id=player_id, player2_id=1, created_at=date.today())
             db.session.add(game_player)
             db.session.commit()
-            return game_player
+            return {"data": game_player}
         except Exception as e:
-            return f"Error creating game player: {str(e)}"
+            return {"error": str(e)}
     
     @staticmethod
     def get_game_play():
