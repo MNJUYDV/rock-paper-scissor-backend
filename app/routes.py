@@ -25,7 +25,9 @@ def get_leaderboard():
 def create_leaderboard_entry():
     try:
         response = LeaderBoardService.create_leaderboard_entry(request)
-        return jsonify({'data': {"leaderboard_id": response.id}, 'message': 'leaderboard entry created successfully'}), 201
+        if "error" in response:
+            raise Exception(response["error"])
+        return jsonify({'data': response, 'message': 'leaderboard entry created successfully'}), 201
     except Exception as e:
         return jsonify({'error': f'Error creating leaderboard entry: {str(e)}'}), 500
 

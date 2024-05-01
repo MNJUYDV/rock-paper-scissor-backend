@@ -63,8 +63,13 @@ class LeaderBoardService:
             player1_score = request_data.get('player1_score')
             player2_score = request_data.get('player2_score')
 
-            if not game_id:
-                return jsonify({'error': 'Game ID is required'}), 400
+            if not game_id or not isinstance(game_id, int) or game_id <= 0:
+                return {'error': 'Valid game ID is required'}
+            
+            if (player1_score is None or not isinstance(player1_score, int) or player1_score < 0
+                or player2_score is None or not isinstance(player2_score, int) or player2_score < 0):
+                return {'error': 'Player scores must be non-negative integers'}
+            
             
             leaderboard_entry = LeaderBoard(
                 game_id=game_id,
@@ -74,10 +79,9 @@ class LeaderBoardService:
             )
             db.session.add(leaderboard_entry)
             db.session.commit()
-
-            return leaderboard_entry
+            return {"leaderboard_id": leaderboard_entry.id}
         except Exception as e:
-            return jsonify({'error': f'Error creating leaderboard entry: {str(e)}'}), 500
+            return {'error': f'Error creating leaderboard entry: {str(e)}'}
     
     @staticmethod
     def get_leaderboard():
