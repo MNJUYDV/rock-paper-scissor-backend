@@ -1,9 +1,9 @@
 from app import db
-from sqlalchemy import Index, UniqueConstraint
+from sqlalchemy import Index
 
 class GamePlayer(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    game_id = db.Column(db.Integer, db.ForeignKey('game.id'), nullable=False)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'), nullable=False, unique=True)
     player1_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
     player2_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
     created_at = db.Column(db.Date, nullable=False)
@@ -13,10 +13,9 @@ class GamePlayer(db.Model):
     player2 = db.relationship('Player', foreign_keys=[player2_id])
     game = db.relationship('Game', backref='gameplayer_entries')
 
-    # Define index and uniqueness
+    # Define index
     __table_args__ = (
         Index('idx_gameplayer_player1_game', 'player1_id', 'game_id'),
-        UniqueConstraint('player1_id', 'game_id', name='uq_gameplayer_player1_game'),
     )
 
     def __repr__(self):

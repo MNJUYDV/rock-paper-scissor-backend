@@ -13,6 +13,7 @@ class LeaderBoardService:
         try:
             # Query to get aggregated stats for each player
             stats_query = db.session.query(
+                Player.id,
                 Player.name,
                 func.sum(
                     case(
@@ -44,8 +45,9 @@ class LeaderBoardService:
             # Convert results to a dictionary
             aggregated_stats_per_player = {}
             for result in results:
-                player_name, wins, losses, ties = result
-                aggregated_stats_per_player[player_name] = {
+                player_id, player_name, wins, losses, ties = result
+                aggregated_stats_per_player[player_id] = {
+                    "player_name": player_name,
                     "wins": wins or 0,
                     "losses": losses or 0,
                     "ties": ties or 0
