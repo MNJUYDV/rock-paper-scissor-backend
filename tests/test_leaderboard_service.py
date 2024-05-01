@@ -24,8 +24,8 @@ class TestLeaderboardAPI(unittest.TestCase):
     @patch('app.services.leaderboard_service.db')
     def test_get_players_stats_success(self, MockDB):
         # Mocking the query results
-        mock_result1 = ('Player1', 3, 2, 1)
-        mock_result2 = ('Player2', 2, 3, 0)
+        mock_result1 = (2,'Player1', 3, 2, 1)
+        mock_result2 = (3,'Player2', 2, 3, 0)
 
         # Set the return value of the mock query
         MockDB.session.query().join().join().group_by().order_by().limit().all.return_value = [mock_result1, mock_result2]
@@ -35,8 +35,8 @@ class TestLeaderboardAPI(unittest.TestCase):
 
         # Assertions
         expected_result = {
-            'Player1': {'wins': 3, 'losses': 2, 'ties': 1},
-            'Player2': {'wins': 2, 'losses': 3, 'ties': 0}
+            2: {'player_name': 'Player1', 'wins': 3, 'losses': 2, 'ties': 1},
+            3: {'player_name': 'Player2', 'wins': 2, 'losses': 3, 'ties': 0}
         }
         self.assertEqual(result, expected_result)
         
