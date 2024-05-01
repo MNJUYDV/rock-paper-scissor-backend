@@ -1,6 +1,7 @@
 from app import db
 from app.models.player import Player
 from flask import jsonify
+import logging
 
 class PlayerService:
     @staticmethod
@@ -16,6 +17,8 @@ class PlayerService:
             new_player = Player(name=player_name)
             db.session.add(new_player)
             db.session.commit()
+            logging.info(f"Player '{new_player.id}' created successfully")
             return {"data": new_player, "status_code": 200}
         except Exception as e:
+            logging.error(f"Error creating player: {str(e)}")
             return {"error": str(e), "status_code": 500}

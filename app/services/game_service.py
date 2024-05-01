@@ -2,6 +2,7 @@ from app import db
 from app.models.game import Game
 from app.services.player_service import PlayerService
 from app.services.game_player_service import GamePlayerService
+import logging
 
 class GameService:
     
@@ -11,6 +12,7 @@ class GameService:
             new_game = Game(name="game1")
             db.session.add(new_game)
             db.session.commit()
+            logging.info(f"Game '{new_game.id}' created successfully")
             return {"data": new_game}
         except Exception as e:
             return {"error": str(e)}
