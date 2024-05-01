@@ -33,7 +33,9 @@ def create_leaderboard_entry():
 def start_game():
     try:
         response = GameService.start_game(request)
-        return jsonify({'data': {"game_id": response.game_id}, 'message': 'Game entry created successfully'}), 201
+        if "error" in response:
+            raise Exception(response["error"])
+        return jsonify({'data': response, 'message': 'Game entry created successfully'}), 201
     except Exception as e:
         return jsonify({'error': f'Error starting game: {str(e)}'}), 500
 

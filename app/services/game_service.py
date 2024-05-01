@@ -18,9 +18,11 @@ class GameService:
     @staticmethod
     def start_game(request):
         try:
-            player = PlayerService.create_player(request)
+            player_response = PlayerService.create_player(request)
+            if "error" in player_response:
+                raise Exception(player_response["error"])
             game = GameService.create_game()
-            game_player = GamePlayerService.create_game_player(game.id, player.id)
-            return game_player
+            game_player = GamePlayerService.create_game_player(game.id, player_response["data"].id)
+            return {"data": {"game_player_id": game_player.id}}
         except Exception as e:
-            return f"Error starting game: {str(e)}"
+            return {"error": str(e)}
